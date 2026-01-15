@@ -1,0 +1,14 @@
+{
+  "name": "secure-notes",
+  "version": "1.0.0",
+  "description": "SecureNotes Smart Contract Project",
+  "scripts": {
+    "test": "npx hardhat test"
+  },
+  "author": "",
+  "license": "MIT",
+  "devDependencies": {
+    "hardhat": "^2.19.0",
+    "@nomicfoundation/hardhat-toolbox": "^4.0.0"
+  }
+}
