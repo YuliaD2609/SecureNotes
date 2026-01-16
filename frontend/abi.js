@@ -78,6 +78,25 @@ const CONTRACT_ABI = [
             {
                 "indexed": true,
                 "internalType": "address",
+                "name": "deleter",
+                "type": "address"
+            }
+        ],
+        "name": "NoteDeleted",
+        "type": "event"
+    },
+    {
+        "anonymous": false,
+        "inputs": [
+            {
+                "indexed": true,
+                "internalType": "uint256",
+                "name": "id",
+                "type": "uint256"
+            },
+            {
+                "indexed": true,
+                "internalType": "address",
                 "name": "reader",
                 "type": "address"
             }
@@ -105,6 +124,12 @@ const CONTRACT_ABI = [
                 "internalType": "address",
                 "name": "recipient",
                 "type": "address"
+            },
+            {
+                "indexed": false,
+                "internalType": "uint256",
+                "name": "timestamp",
+                "type": "uint256"
             }
         ],
         "name": "NoteSent",
@@ -154,6 +179,19 @@ const CONTRACT_ABI = [
                 "type": "uint256"
             }
         ],
+        "name": "deleteNote",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "uint256",
+                "name": "_id",
+                "type": "uint256"
+            }
+        ],
         "name": "getIcon",
         "outputs": [
             {
@@ -182,6 +220,31 @@ const CONTRACT_ABI = [
                 "internalType": "struct SecureNotes.Icon",
                 "name": "",
                 "type": "tuple"
+            }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [],
+        "name": "getMyReceivedIcons",
+        "outputs": [
+            {
+                "components": [
+                    {
+                        "internalType": "uint256",
+                        "name": "iconId",
+                        "type": "uint256"
+                    },
+                    {
+                        "internalType": "address",
+                        "name": "sender",
+                        "type": "address"
+                    }
+                ],
+                "internalType": "struct SecureNotes.ReceivedIcon[]",
+                "name": "",
+                "type": "tuple[]"
             }
         ],
         "stateMutability": "view",
@@ -217,6 +280,16 @@ const CONTRACT_ABI = [
                     {
                         "internalType": "bool",
                         "name": "isRead",
+                        "type": "bool"
+                    },
+                    {
+                        "internalType": "uint256",
+                        "name": "timestamp",
+                        "type": "uint256"
+                    },
+                    {
+                        "internalType": "bool",
+                        "name": "isDeleted",
                         "type": "bool"
                     }
                 ],

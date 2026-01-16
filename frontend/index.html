@@ -33,9 +33,40 @@
         <section class="section">
             <h2>Icon Shop</h2>
             <p>Send an icon to make someone smile!</p>
+
+            <!-- Gallery View -->
             <div id="iconGrid" class="grid">
-                <!-- Icons will be loaded here -->
                 <div class="card">Connect your wallet to see the icons.</div>
+            </div>
+
+            <!-- Detail View (Initially Hidden) -->
+            <div id="iconDetailView" class="detail-view hidden">
+                <div class="detail-image-container">
+                    <img id="detailImage" src="" alt="Icon" class="detail-img">
+                </div>
+                <div class="detail-form-container">
+                    <h3 id="detailName">Icon Name</h3>
+                    <p id="detailPrice" class="detail-price">0 ETH</p>
+
+                    <div class="form-group">
+                        <label for="detailRecipient">Recipient Address:</label>
+                        <input type="text" id="detailRecipient" placeholder="0x...">
+                    </div>
+
+                    <div class="detail-actions">
+                        <button id="detailBuyBtn" class="btn">Confirm & Send</button>
+                        <button id="detailBackBtn" class="btn btn-secondary">I have changed idea</button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- My Cards Section -->
+        <section class="section">
+            <h2>My Cards</h2>
+            <p>Cards you have received from friends!</p>
+            <div id="myCardsGrid" class="grid">
+                <div class="card">Connect your wallet to see your cards.</div>
             </div>
         </section>
 
@@ -43,8 +74,10 @@
         <section class="section">
             <h2>My Notes</h2>
             <p>View and decrypt your received messages.</p>
+            <p class="warning-text">⚠️ You can only view a message once.<br>You can only see the content once decrypted.
+            </p>
             <div id="notesList">
-                <p>Connect wallet to see your notes.</p>
+                <p>Connect your wallet to see your recieved notes.</p>
             </div>
         </section>
     </main>

@@ -130,16 +130,146 @@ textarea:focus {
   border-color: var(--secondary);
 }
 
+/* Utility Classes */
+.hidden {
+  display: none !important;
+}
+
+/* Icon Images */
 .icon-img {
   width: 100px;
   height: 100px;
   object-fit: contain;
   margin-bottom: 1rem;
+  transition: transform 0.3s ease;
+}
+
+.card:hover .icon-img {
+  transform: scale(1.1);
+}
+
+/* Detail View Layout */
+.detail-view {
+  display: flex;
+  gap: 2rem;
+  align-items: center;
+  padding: 1rem;
+  animation: fadeIn 0.5s ease;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.detail-image-container {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+}
+
+.detail-img {
+  width: 300px;
+  height: 300px;
+  object-fit: contain;
+  filter: drop-shadow(0 10px 15px rgba(0, 0, 0, 0.1));
+}
+
+.detail-form-container {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.detail-price {
+  font-size: 1.5rem;
+  color: var(--primary);
+  font-weight: bold;
+  margin: 0.5rem 0 1.5rem 0;
+}
+
+.detail-actions {
+  display: flex;
+  gap: 1rem;
+  margin-top: 1rem;
+}
+
+.btn-secondary {
+  background-color: #ddd;
+  color: #555;
+  box-shadow: none;
+}
+
+.btn-secondary:hover {
+  background-color: #ccc;
+  box-shadow: none;
+  transform: none;
 }
 
 .note-item {
-  border-bottom: 1px solid #eee;
-  padding: 1rem 0;
+  background-color: white;
+  padding: 1rem;
+  margin-bottom: 1rem;
+  border-radius: var(--border-radius);
+  box-shadow: var(--shadow);
+  border-left: 5px solid var(--secondary);
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.note-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.9rem;
+  color: #666;
+}
+
+.note-timestamp {
+  font-size: 0.8rem;
+  color: #999;
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+}
+
+.note-actions {
+  display: flex;
+  gap: 0.5rem;
+  margin-top: 0.5rem;
+}
+
+.btn-danger {
+  background-color: #ff6b6b;
+  color: white;
+}
+
+.btn-danger:hover {
+  background-color: #e65555;
+  box-shadow: 0 4px 15px rgba(255, 107, 107, 0.4);
+}
+
+.warning-text {
+  color: #e65555;
+  font-size: 0.9rem;
+  margin-top: -1rem;
+  margin-bottom: 1rem;
+  font-weight: 600;
+}
+
+/* Ensure empty messages are one line if possible */
+.card p,
+#notesList p {
+  white-space: normal;
 }
 
 .note-item:last-child {

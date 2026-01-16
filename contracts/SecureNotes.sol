@@ -16,6 +16,8 @@ contract SecureNotes {
         address recipient;
         string encryptedContent;
         bool isRead;
+        uint256 timestamp;
+        bool isDeleted;
     }
 
     mapping(uint256 => Note) private notes;
@@ -24,10 +26,12 @@ contract SecureNotes {
     event NoteSent(
         uint256 indexed id,
         address indexed sender,
-        address indexed recipient
+        address indexed recipient,
+        uint256 timestamp
     );
 
     event NoteRead(uint256 indexed id, address indexed reader);
+    event NoteDeleted(uint256 indexed id, address indexed deleter);
 
     function sendEncryptedNote(
         address _recipient,
@@ -40,10 +44,12 @@ contract SecureNotes {
             sender: msg.sender,
             recipient: _recipient,
             encryptedContent: _encryptedContent,
-            isRead: false
+            isRead: false,
+            timestamp: block.timestamp,
+            isDeleted: false
         });
 
-        emit NoteSent(noteCount, msg.sender, _recipient);
+        emit NoteSent(noteCount, msg.sender, _recipient, block.timestamp);
         noteCount++;
     }
 
@@ -54,12 +60,23 @@ contract SecureNotes {
         Note storage note = notes[_id];
 
         require(msg.sender == note.recipient, "Not authorized");
+        require(!note.isDeleted, "Note deleted");
         require(!note.isRead, "Note already read");
 
         note.isRead = true;
         emit NoteRead(_id, msg.sender);
 
         return note.encryptedContent;
+    }
+
+    function deleteNote(uint256 _id) external {
+        Note storage note = notes[_id];
+        require(msg.sender == note.recipient, "Not authorized");
+        require(!note.isDeleted, "Note already deleted");
+
+        note.isDeleted = true;
+        note.encryptedContent = ""; // Clear content
+        emit NoteDeleted(_id, msg.sender);
     }
 
     /* Icons to buy */
@@ -80,6 +97,12 @@ contract SecureNotes {
 
     mapping(uint256 => Icon) private icons;
     uint256 public iconCount;
+
+    struct ReceivedIcon {
+        uint256 iconId;
+        address sender;
+    }
+    mapping(address => ReceivedIcon[]) private receivedIcons;
 
     event IconAdded(uint256 indexed id, IconType iconType, uint256 price);
 
@@ -150,6 +173,12 @@ contract SecureNotes {
             require(refundSent, "Refund failed");
         }
 
+        // Store received icon
+        receivedIcons[_recipient].push(ReceivedIcon({
+            iconId: _id,
+            sender: msg.sender
+        }));
+
         emit IconPurchased(
             _id,
             icon.iconType,
@@ -175,6 +204,10 @@ contract SecureNotes {
         returns (Icon memory)
     {
         return icons[_id];
+    }
+
+    function getMyReceivedIcons() external view returns (ReceivedIcon[] memory) {
+        return receivedIcons[msg.sender];
     }
 
     receive() external payable {
