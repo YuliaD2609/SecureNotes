@@ -1,3 +1,4 @@
+/* --- Variables and Global Styles --- */
 :root {
   --primary: #FF8C94;
   --secondary: #84D8E2;
@@ -19,6 +20,7 @@ body {
   min-height: 100vh;
 }
 
+/* --- Header --- */
 header {
   background-color: white;
   padding: 1rem 2rem;
@@ -40,6 +42,7 @@ h2 {
   padding-bottom: 0.5rem;
 }
 
+/* --- Layout --- */
 main {
   flex: 1;
   padding: 2rem;
@@ -62,6 +65,7 @@ main {
   transform: translateY(-2px);
 }
 
+/* --- Buttons and Forms --- */
 .btn {
   background-color: var(--primary);
   color: white;
@@ -107,6 +111,7 @@ textarea:focus {
   background: white;
 }
 
+/* --- Grid and Cards --- */
 .grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
@@ -142,7 +147,7 @@ textarea:focus {
   display: none !important;
 }
 
-/* Icon Images */
+/* --- Images --- */
 .icon-img {
   width: 100px;
   height: 100px;
@@ -155,7 +160,7 @@ textarea:focus {
   transform: scale(1.1);
 }
 
-/* Detail View Layout */
+/* --- Detail View --- */
 .detail-view {
   display: flex;
   gap: 2rem;
@@ -221,6 +226,7 @@ textarea:focus {
   transform: none;
 }
 
+/* --- Notes Components --- */
 .note-item {
   background-color: white;
   padding: 1rem;
@@ -290,6 +296,7 @@ textarea:focus {
   border-bottom: none;
 }
 
+/* --- Footer and Status --- */
 .footer {
   text-align: center;
   padding: 2rem;

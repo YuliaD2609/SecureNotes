@@ -1,10 +1,13 @@
+// Address of the deployed smart contract (Localhost)
 const CONTRACT_ADDRESS = "0xA51c1fc2f0D1a1b8494Ed1FE312d7C3a78Ed91C0"; // Localhost deployment
 
-let provider;
-let signer;
-let contract;
-let currentAddress;
+// Global variables for Ethers.js objects
+let provider;       // Connection to the Ethereum network
+let signer;         // The account executing transactions
+let contract;       // The contract instance
+let currentAddress; // The user's wallet address
 
+// List of available Icon types matching the contract Enum
 const IconTypes = [
     "HappyBirthday",
     "Congratulations",
@@ -12,11 +15,12 @@ const IconTypes = [
     "Graduation"
 ];
 
+// DOM Elements
 const connectBtn = document.getElementById('connectBtn');
 const userStatus = document.getElementById('userStatus');
-// State
-let loadedIconsData = [];
-let currentSelectedIconId = null;
+// State variables
+let loadedIconsData = [];       // Cache for loaded icons
+let currentSelectedIconId = null; // ID of the icon currently being viewed in detail
 
 // UI Elements (added)
 const iconGrid = document.getElementById('iconGrid');
@@ -30,25 +34,30 @@ const detailRecipient = document.getElementById('detailRecipient');
 const detailBuyBtn = document.getElementById('detailBuyBtn');
 const detailBackBtn = document.getElementById('detailBackBtn');
 
-// Back Button Handler
+/* --- Event Listeners --- */
+
+// Close Detail View Button
 detailBackBtn.addEventListener('click', closeDetailView);
 
-// Buy Button Handler (Detail View)
+// Buy Button in Detail View
 detailBuyBtn.addEventListener('click', async () => {
     if (currentSelectedIconId === null) return;
     await buyIcon(currentSelectedIconId);
 });
 
-// Connection State
+// Connection State Flag
 let isConnected = false;
 
-// Initialize
+/* --- Initialization --- */
+
+// Initialize the application on page load
 async function init() {
     console.log("Initializing...", "window.ethereum type:", typeof window.ethereum);
+    // Check if MetaMask is installed
     if (window.ethereum) {
         provider = new ethers.BrowserProvider(window.ethereum);
 
-        // Auto-connect check
+        // Check if already authorized (auto-connect)
         try {
             const accounts = await provider.send("eth_accounts", []);
             if (accounts.length > 0) {
@@ -59,6 +68,7 @@ async function init() {
         }
     } else {
         console.error("MetaMask not found!");
+        // Specific error for file:// protocol
         if (window.location.protocol === 'file:') {
             alert("MetaMask does not work when opening files directly (file://). Please use a local server (http://localhost).");
         } else {
@@ -67,7 +77,7 @@ async function init() {
     }
 }
 
-// Connect / Disconnect Handler
+// Handler for Connect/Disconnect button
 connectBtn.addEventListener('click', async () => {
     if (isConnected) {
         disconnectWallet();
@@ -76,12 +86,17 @@ connectBtn.addEventListener('click', async () => {
     }
 });
 
+/* --- Wallet Management --- */
+
+// Connect to MetaMask wallet
 async function connectWallet() {
     if (!provider) return;
     try {
+        // Request access to accounts
         const accounts = await provider.send("eth_requestAccounts", []);
         currentAddress = accounts[0];
         signer = await provider.getSigner();
+        // Initialize contract instance
         contract = new ethers.Contract(CONTRACT_ADDRESS, CONTRACT_ABI, signer);
 
         updateUIConnected();
@@ -92,44 +107,49 @@ async function connectWallet() {
     }
 }
 
+// Disconnect wallet (reset app state)
 function disconnectWallet() {
     isConnected = false;
     currentAddress = null;
     signer = null;
     contract = null;
 
-    // Reset UI
+    // Reset UI text
     connectBtn.textContent = "Connect Wallet";
     connectBtn.classList.remove('btn-secondary'); // Optional styling
     userStatus.textContent = "Not Connected";
 
-    // Clear Data Displays
+    // Clear Data Displays with prompts
     iconGrid.innerHTML = '<div class="card">Connect your wallet to see the icons.</div>';
     myCardsGrid.innerHTML = '<div class="card">Connect your wallet to see your cards.</div>';
     notesList.innerHTML = '<p>Connect your wallet to see your recieved notes.</p>';
 
-    // Reset Views in case detail view is open
+    // Close detail view if open
     closeDetailView();
 }
 
+// Update UI elements when connected
 function updateUIConnected() {
     isConnected = true;
     connectBtn.textContent = "Disconnect";
     connectBtn.disabled = false; // Enable to allow disconnect
+    // Display truncated address
     userStatus.textContent = `${currentAddress.substring(0, 6)}...${currentAddress.substring(38)}`;
 }
 
-// Load Data
+// Load all application data
 async function loadData() {
     await loadIcons();
     await loadMyCards();
     await loadNotes();
 }
 
-// Load Icons
+/* --- Icon Shop Logic --- */
+
+// Fetch and display available icons from the shop
 async function loadIcons() {
     iconGrid.innerHTML = "Loading icons...";
-    loadedIconsData = []; // Reset state
+    loadedIconsData = []; // Reset cache
     try {
         const count = await contract.iconCount();
         iconGrid.innerHTML = "";
@@ -153,7 +173,7 @@ async function loadIcons() {
             const card = document.createElement('div');
             card.className = 'card';
 
-            // For simple card: just image and a "View" button or just clickable area
+            // Format display name (e.g., "HappyBirthday" -> "Happy Birthday")
             const iconTypeName = IconTypes[Number(icon.iconType)] || "Unknown";
             const displayName = iconTypeName.replace(/([A-Z])/g, ' $1').trim();
 
@@ -170,7 +190,7 @@ async function loadIcons() {
     }
 }
 
-// Load My Cards
+// Load cards received by the current user
 async function loadMyCards() {
     myCardsGrid.innerHTML = "Loading cards...";
     try {
@@ -187,7 +207,7 @@ async function loadMyCards() {
             const iconId = item.iconId;
             const sender = item.sender;
 
-            // We need to fetch icon details (like type) to display image
+            // Fetch specific icon details for display
             const iconDetails = await contract.getIcon(iconId);
             const iconTypeName = IconTypes[Number(iconDetails.iconType)] || "Unknown";
             const displayName = iconTypeName.replace(/([A-Z])/g, ' $1').trim();
@@ -208,14 +228,16 @@ async function loadMyCards() {
     }
 }
 
-// Open Detail View
+/* --- Detail View Logic --- */
+
+// Open the detail view for a specific icon
 window.openDetailIcon = (id) => {
     const iconData = loadedIconsData[id];
     if (!iconData) return;
 
     currentSelectedIconId = id;
 
-    // Populate Detail View
+    // Populate detail view
     const iconTypeName = IconTypes[iconData.iconType] || "Unknown";
     const displayName = iconTypeName.replace(/([A-Z])/g, ' $1').trim();
     const priceEth = ethers.formatEther(iconData.price);
@@ -225,19 +247,19 @@ window.openDetailIcon = (id) => {
     detailPrice.textContent = `${priceEth} ETH`;
     detailRecipient.value = ""; // Clear previous input
 
-    // Show/Hide Views
+    // Show view, hide grid
     iconGrid.classList.add('hidden');
     iconDetailView.classList.remove('hidden');
 }
 
-// Close Detail View
+// Close the detail view and return to the grid
 function closeDetailView() {
     iconDetailView.classList.add('hidden');
     iconGrid.classList.remove('hidden');
     currentSelectedIconId = null;
 }
 
-// Buy Icon (Internal function)
+// Execute purchase of an icon
 async function buyIcon(id) {
     const recipient = detailRecipient.value;
 
@@ -248,11 +270,14 @@ async function buyIcon(id) {
 
     try {
         const iconData = loadedIconsData[id];
+        // Call smart contract function to buy and send
         const tx = await contract.buyAndSendIcon(id, recipient, { value: iconData.price });
         alert("Transaction sent! Waiting for confirmation...");
-        await tx.wait();
+        await tx.wait(); // Wait for block confirmation
         alert("Gift sent successfully!");
         closeDetailView();
+        // Reload data to reflect changes (though shop doesn't change, balances do)
+        loadData();
     } catch (err) {
         console.error(err);
         alert("Transaction failed: " + (err.reason || err.message));
@@ -262,7 +287,9 @@ async function buyIcon(id) {
 // Global for backward compatibility / console debugging
 window.buyIcon = buyIcon;
 
-// Send Note
+/* --- Notes Logic --- */
+
+// Send a new encrypted note
 document.getElementById('sendNoteBtn').addEventListener('click', async () => {
     const recipient = document.getElementById('noteRecipient').value;
     const content = document.getElementById('noteContent').value;
@@ -276,6 +303,9 @@ document.getElementById('sendNoteBtn').addEventListener('click', async () => {
         return;
     }
 
+    // In a real app, encryption would happen here off-chain.
+    // For this demo, we simulate encryption by calling the function.
+    // Ideally: const encrypted = encrypt(content, recipientPublicKey);
     const encrypted = content;
 
     try {
@@ -283,14 +313,16 @@ document.getElementById('sendNoteBtn').addEventListener('click', async () => {
         alert("Sending note...");
         await tx.wait();
         alert("Note sent successfully!");
+        // Clear inputs
         document.getElementById('noteContent').value = "";
+        // Refresh list to show sent notes if we were tracking them (function only loads received)
     } catch (err) {
         console.error(err);
         alert("Failed to send note: " + (err.reason || err.message));
     }
 });
 
-// Load Notes
+// Load notes received by the user
 async function loadNotes() {
     notesList.innerHTML = "Loading notes...";
     try {
@@ -301,9 +333,9 @@ async function loadNotes() {
 
         for (let i = 0; i < count; i++) {
             const note = await contract.getNote(i);
-            // note: {sender, recipient, encryptedContent, isRead, timestamp, isDeleted}
+            // note object contains: sender, recipient, encryptedContent, isRead, timestamp, isDeleted
 
-            // Should be visible if I am recipient
+            // Filter: Only show notes sent to the current user
             if (note.recipient.toLowerCase() === currentAddress.toLowerCase()) {
                 if (note.isDeleted) continue; // Skip deleted notes
 
@@ -311,6 +343,7 @@ async function loadNotes() {
                 const noteElement = document.createElement('div');
                 noteElement.className = 'note-item';
 
+                // Format timestamp
                 const timestampDate = new Date(Number(note.timestamp) * 1000);
                 const dateString = timestampDate.toLocaleDateString() + " " + timestampDate.toLocaleTimeString();
 
@@ -344,25 +377,26 @@ async function loadNotes() {
     }
 }
 
-// Read Note
+// Decrypt and Read a Note
 window.readNote = async (id) => {
     try {
+        // 1. Fetch the note content 'off-chain' (via call) first to see the data
         const note = await contract.getNote(id);
         const decryptedContent = note.encryptedContent;
 
         const contentElement = document.getElementById(`note-content-${id}`);
         contentElement.textContent = "Decrypting..."; // Feedback
 
-        // Trigger transaction to mark as read
+        // 2. Trigger transaction to mark as read on-chain
         const tx = await contract.readEncryptedNote(id);
         contentElement.textContent = "Processing...";
         await tx.wait();
 
-        // Show content
+        // 3. Display the content
         contentElement.textContent = decryptedContent;
-        contentElement.style.color = "#1a237e";
+        contentElement.style.color = "#1a237e"; // Dark blue text
 
-        // Remove Decrypt Button
+        // 4. Remove the decrypt button (View Once behavior)
         const btn = document.getElementById(`decrypt-btn-${id}`);
         if (btn) btn.remove();
     } catch (err) {
@@ -374,7 +408,7 @@ window.readNote = async (id) => {
     }
 };
 
-// Delete Note
+// Delete a Note
 window.deleteNote = async (id) => {
     if (!confirm("Are you sure you want to delete this message? This action cannot be undone.")) return;
 
@@ -383,7 +417,7 @@ window.deleteNote = async (id) => {
         alert("Deleting note... Waiting for confirmation.");
         await tx.wait();
 
-        loadNotes(); // Refresh list
+        loadNotes(); // Refresh list to remove the deleted note
         alert("Note deleted.");
     } catch (err) {
         console.error(err);

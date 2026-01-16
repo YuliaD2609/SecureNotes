@@ -5,12 +5,15 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>SecureNotes</title>
+    <!-- Fonts and Styles -->
     <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@400;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="style.css">
+    <!-- Ethers.js Library for Blockchain Interaction -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/ethers/6.7.0/ethers.umd.min.js"></script>
 </head>
 
 <body>
+    <!-- HEADER: App Title and Wallet Connection -->
     <header>
         <h1>SecureNotes</h1>
         <div id="userStatus" class="status-badge">Not Connected</div>
@@ -18,7 +21,7 @@
     </header>
 
     <main>
-        <!-- Send Note Section -->
+        <!-- SEND NOTE: Form to create new encrypted messages -->
         <section class="section">
             <h2>Send a Secret Note</h2>
             <p>Send an encrypted message securely to any address.</p>
@@ -29,17 +32,17 @@
             </div>
         </section>
 
-        <!-- Icon Shop Section -->
+        <!-- ICON SHOP: Buy and send icon gifts -->
         <section class="section">
             <h2>Icon Shop</h2>
             <p>Send an icon to make someone smile!</p>
 
-            <!-- Gallery View -->
+            <!-- Gallery View (Listing all icons) -->
             <div id="iconGrid" class="grid">
                 <div class="card">Connect your wallet to see the icons.</div>
             </div>
 
-            <!-- Detail View (Initially Hidden) -->
+            <!-- Detail View (Buying a specific icon) - Initially Hidden -->
             <div id="iconDetailView" class="detail-view hidden">
                 <div class="detail-image-container">
                     <img id="detailImage" src="" alt="Icon" class="detail-img">
@@ -61,7 +64,7 @@
             </div>
         </section>
 
-        <!-- My Cards Section -->
+        <!-- MY CARDS: Display received icon gifts -->
         <section class="section">
             <h2>My Cards</h2>
             <p>Cards you have received from friends!</p>
@@ -70,7 +73,7 @@
             </div>
         </section>
 
-        <!-- My Notes Section -->
+        <!-- MY NOTES: Display received encrypted messages -->
         <section class="section">
             <h2>My Notes</h2>
             <p>View and decrypt your received messages.</p>
@@ -82,6 +85,7 @@
         </section>
     </main>
 
+    <!-- App Logic Scripts -->
     <script src="abi.js"></script>
     <script src="app.js"></script>
 </body>
