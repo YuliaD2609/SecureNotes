@@ -326,7 +326,7 @@ async function loadNotes() {
                         : `<p id="note-content-${i}" style="font-weight:bold">Encrypted Message</p>`
                     }
                     <div class="note-actions">
-                        ${!note.isRead ? `<button class="btn" onclick="readNote(${i})">Decrypt & Read</button>` : ''}
+                        ${!note.isRead ? `<button class="btn" onclick="readNote(${i})" id="decrypt-btn-${i}">Decrypt & Read</button>` : ''}
                         <button class="btn btn-danger" onclick="deleteNote(${i})">Delete</button>
                     </div>
                 `;
@@ -360,10 +360,11 @@ window.readNote = async (id) => {
 
         // Show content
         contentElement.textContent = decryptedContent;
-        contentElement.style.color = "var(--primary)";
+        contentElement.style.color = "#1a237e";
 
-        // Optional: Refresh list to show "Message read" status if page reloads, 
-        // but here we keep the content visible as requested ("view once" implies they see it now).
+        // Remove Decrypt Button
+        const btn = document.getElementById(`decrypt-btn-${id}`);
+        if (btn) btn.remove();
     } catch (err) {
         console.error(err);
         alert("Failed to read note: " + (err.reason || err.message));

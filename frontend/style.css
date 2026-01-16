@@ -113,6 +113,13 @@ textarea:focus {
   gap: 1.5rem;
 }
 
+.grid>p {
+  grid-column: 1 / -1;
+  text-align: center;
+  color: #777;
+  font-style: italic;
+}
+
 .card {
   background: white;
   padding: 1.5rem;
@@ -266,10 +273,17 @@ textarea:focus {
   font-weight: 600;
 }
 
-/* Ensure empty messages are one line if possible */
+/* Ensure empty messages are one line if possible and styled nicely */
 .card p,
 #notesList p {
   white-space: normal;
+}
+
+#notesList>p {
+  text-align: center;
+  color: #777;
+  font-style: italic;
+  margin: 2rem 0;
 }
 
 .note-item:last-child {
