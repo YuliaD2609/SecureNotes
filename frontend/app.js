@@ -6,11 +6,10 @@ let contract;
 let currentAddress;
 
 const IconTypes = [
-    "🎂 BuonCompleanno",
-    "🕺 AuguriM",
-    "💃 AuguriF",
-    "🎉 Auguri",
-    "🎄 BuonNatale"
+    "HappyBirthday",
+    "Congratulations",
+    "MerryChristmas",
+    "Graduation"
 ];
 
 const connectBtn = document.getElementById('connectBtn');
@@ -20,10 +19,30 @@ const notesList = document.getElementById('notesList');
 
 // Initialize
 async function init() {
+    console.log("Initializing...", "window.ethereum type:", typeof window.ethereum);
     if (window.ethereum) {
         provider = new ethers.BrowserProvider(window.ethereum);
+
+        // Auto-connect if already authorized
+        try {
+            const accounts = await provider.send("eth_accounts", []);
+            if (accounts.length > 0) {
+                currentAddress = accounts[0];
+                signer = await provider.getSigner();
+                contract = new ethers.Contract(CONTRACT_ADDRESS, CONTRACT_ABI, signer);
+                updateUIConnected();
+                loadData();
+            }
+        } catch (err) {
+            console.error("Auto-connect failed", err);
+        }
     } else {
-        alert("Please install MetaMask!");
+        console.error("MetaMask not found!");
+        if (window.location.protocol === 'file:') {
+            alert("MetaMask does not work when opening files directly (file://). Please use a local server (http://localhost).");
+        } else {
+            alert("Please install MetaMask! (window.ethereum not found)");
+        }
     }
 }
 
@@ -63,10 +82,6 @@ async function loadIcons() {
         const count = await contract.iconCount();
         iconGrid.innerHTML = "";
 
-        // If count is 0, add some dummy icons for demo if owner hasn't added any yet?
-        // Actually, let's just show what's there. 
-        // If 0, we might want to check if we are owner and add some? No, too complex for now.
-
         if (count == 0n) {
             iconGrid.innerHTML = "<p>No icons available in the shop yet.</p>";
             return;
@@ -80,15 +95,17 @@ async function loadIcons() {
             const card = document.createElement('div');
             card.className = 'card';
 
-            const iconName = IconTypes[Number(icon.iconType)] || "Unknown";
+            const iconTypeName = IconTypes[Number(icon.iconType)] || "Unknown";
+            // Prettify name for display by adding spaces before capitals
+            const displayName = iconTypeName.replace(/([A-Z])/g, ' $1').trim();
             const priceEth = ethers.formatEther(icon.price);
 
             card.innerHTML = `
-                <div class="icon-display">🎁</div>
-                <h3>${iconName}</h3>
+                <img src="images/${iconTypeName}.png" alt="${displayName}" class="icon-img">
+                <h3>${displayName}</h3>
                 <p>Price: ${priceEth} ETH</p>
                 <input type="text" id="recipient-${i}" placeholder="Recipient 0x..." style="margin-top:0.5rem">
-                <button class="btn" onclick="buyIcon(${i})">Send Gift 🎁</button>
+                <button class="btn" onclick="buyIcon(${i})">Send Gift</button>
             `;
             iconGrid.appendChild(card);
         }
@@ -113,7 +130,7 @@ window.buyIcon = async (id) => {
         const tx = await contract.buyAndSendIcon(id, recipient, { value: icon.price });
         alert("Transaction sent! Waiting for confirmation...");
         await tx.wait();
-        alert("Gift sent successfully! 🎉");
+        alert("Gift sent successfully!");
     } catch (err) {
         console.error(err);
         alert("Transaction failed: " + (err.reason || err.message));
@@ -134,13 +151,11 @@ document.getElementById('sendNoteBtn').addEventListener('click', async () => {
         return;
     }
 
-    // NOTE: Simple MVP "Encryption" - just string for now as per plan
-    // In real app, use EthCrypto or similar.
     const encrypted = content;
 
     try {
         const tx = await contract.sendEncryptedNote(recipient, encrypted);
-        alert("Sending note... 🔒");
+        alert("Sending note...");
         await tx.wait();
         alert("Note sent successfully!");
         document.getElementById('noteContent').value = "";
@@ -154,21 +169,12 @@ document.getElementById('sendNoteBtn').addEventListener('click', async () => {
 async function loadNotes() {
     notesList.innerHTML = "Loading your notes...";
     try {
-        // Since we can't filter events easily with simple Ethers V6 in browser without more setup,
-        // and loop is heavy, we will just iterate the last 10 notes and see if they belong to us.
-        // Or better: filter NoteSent events?
-        // For simplicity: Iterate all notes (assuming small count for demo) OR
-        // just check the logs.
-
         const noteCount = await contract.noteCount();
         notesList.innerHTML = "";
         let found = false;
 
         // Loop backwards to show newest first
         for (let i = Number(noteCount) - 1; i >= 0; i--) {
-            // Optimization: In production, use an indexer or events. 
-            // Here we have to fetch each note to check recipient.
-            // This is slow but works for small scale.
             try {
                 const note = await contract.getNote(i);
                 if (note.recipient.toLowerCase() === currentAddress.toLowerCase()) {
@@ -176,14 +182,12 @@ async function loadNotes() {
                     const div = document.createElement('div');
                     div.className = 'note-item';
 
-                    let contentDisplay = "🔒 Encrypted Message";
-                    // If we are recipient, we can "read" it (decrypt) via contract or locally.
-                    // Contract has readEncryptedNote to mark as read.
+                    let contentDisplay = "Encrypted Message";
 
                     if (note.isRead) {
-                        contentDisplay = `🔓 ${note.encryptedContent}`;
+                        contentDisplay = `Decrypted: ${note.encryptedContent}`;
                     } else {
-                        contentDisplay = `<button class="btn" style="padding:0.5rem" onclick="readNote(${i})">Decrypt & Read 🔓</button>`;
+                        contentDisplay = `<button class="btn" style="padding:0.5rem" onclick="readNote(${i})">Decrypt & Read</button>`;
                     }
 
                     div.innerHTML = `
@@ -208,13 +212,13 @@ window.readNote = async (id) => {
         const tx = await contract.readEncryptedNote(id);
         alert("Marking as read... decrypting...");
         await tx.wait();
-        // Reload to show content (or we could fetch return value from static call first)
-        // For UI update:
         loadNotes();
     } catch (err) {
         console.error(err);
         alert("Error reading note");
     }
+
 }
 
-init();
+// Wait for window load to ensure MetaMask has injected window.ethereum
+window.addEventListener('load', init);

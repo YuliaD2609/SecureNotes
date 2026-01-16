@@ -8,11 +8,10 @@ async function main() {
     console.log("Seeding icons to:", contractAddress);
 
     const icons = [
-        { type: 0, price: hre.ethers.parseEther("0.01") }, // BuonCompleanno
-        { type: 1, price: hre.ethers.parseEther("0.02") }, // AuguriM
-        { type: 2, price: hre.ethers.parseEther("0.02") }, // AuguriF
-        { type: 3, price: hre.ethers.parseEther("0.05") }, // Auguri
-        { type: 4, price: hre.ethers.parseEther("0.1") },  // BuonNatale
+        { type: 0, price: hre.ethers.parseEther("2") }, // HappyBirthday
+        { type: 1, price: hre.ethers.parseEther("5") }, // Congratulations
+        { type: 2, price: hre.ethers.parseEther("2") }, // MerryChristmas
+        { type: 3, price: hre.ethers.parseEther("1") }, // Graduation
     ];
 
     for (const icon of icons) {

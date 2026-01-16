@@ -1,15 +1,15 @@
 :root {
-  --primary: #FFB7B2;
-  --secondary: #B5EAD7;
-  --accent: #E2F0CB;
-  --text: #555;
-  --bg: #F9F7F7;
+  --primary: #FF8C94;
+  --secondary: #84D8E2;
+  --accent: #FBE7C6;
+  --text: #4A4A4A;
+  --bg: #F7F8FA;
   --card-bg: white;
-  --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  --shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
 }
 
 body {
-  font-family: 'Quicksand', sans-serif;
+  font-family: 'Quicksand', 'Open Sans', sans-serif;
   background-color: var(--bg);
   color: var(--text);
   margin: 0;
@@ -51,7 +51,7 @@ main {
 
 .section {
   background: var(--card-bg);
-  border-radius: 20px;
+  border-radius: 12px;
   padding: 2rem;
   margin-bottom: 2rem;
   box-shadow: var(--shadow);
@@ -67,7 +67,7 @@ main {
   color: white;
   border: none;
   padding: 0.8rem 1.5rem;
-  border-radius: 25px;
+  border-radius: 8px;
   font-weight: bold;
   cursor: pointer;
   transition: all 0.3s ease;
@@ -75,31 +75,36 @@ main {
 }
 
 .btn:hover {
-  background-color: #ff9e99;
-  transform: scale(1.05);
-  box-shadow: 0 4px 12px rgba(255, 183, 178, 0.4);
+  background-color: #ff7b85;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(255, 140, 148, 0.4);
 }
 
 .btn:disabled {
-  background-color: #ccc;
+  background-color: #e0e0e0;
   cursor: not-allowed;
   transform: none;
+  box-shadow: none;
 }
 
-input, textarea {
+input,
+textarea {
   width: 100%;
   padding: 1rem;
   margin-bottom: 1rem;
-  border: 2px solid var(--accent);
-  border-radius: 15px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
   box-sizing: border-box;
   font-family: inherit;
   transition: border-color 0.3s;
+  background: #FCFCFC;
 }
 
-input:focus, textarea:focus {
+input:focus,
+textarea:focus {
   border-color: var(--secondary);
   outline: none;
+  background: white;
 }
 
 .grid {
@@ -111,16 +116,24 @@ input:focus, textarea:focus {
 .card {
   background: white;
   padding: 1.5rem;
-  border-radius: 15px;
-  border: 2px solid var(--accent);
+  border-radius: 12px;
+  border: 1px solid #eee;
   display: flex;
   flex-direction: column;
   align-items: center;
   text-align: center;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.03);
+  transition: border-color 0.3s;
 }
 
-.icon-display {
-  font-size: 3rem;
+.card:hover {
+  border-color: var(--secondary);
+}
+
+.icon-img {
+  width: 100px;
+  height: 100px;
+  object-fit: contain;
   margin-bottom: 1rem;
 }
 
@@ -143,7 +156,7 @@ input:focus, textarea:focus {
 .status-badge {
   background: var(--accent);
   padding: 0.5rem 1rem;
-  border-radius: 20px;
+  border-radius: 12px;
   font-size: 0.9rem;
   color: #555;
 }

@@ -65,11 +65,10 @@ contract SecureNotes {
     /* Icons to buy */
 
     enum IconType {
-        BuonCompleanno,
-        AuguriM,
-        AuguriF,
-        Auguri,
-        BuonNatale
+        HappyBirthday,
+        Congratulations,
+        MerryChristmas,
+        Graduation
     }
 
     struct Icon {

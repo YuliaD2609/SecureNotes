@@ -1,16 +1,18 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SecureNotes 🌸</title>
+    <title>SecureNotes</title>
     <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@400;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="style.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/ethers/6.7.0/ethers.umd.min.js"></script>
 </head>
+
 <body>
     <header>
-        <h1>SecureNotes 🌸</h1>
+        <h1>SecureNotes</h1>
         <div id="userStatus" class="status-badge">Not Connected</div>
         <button id="connectBtn" class="btn">Connect Wallet</button>
     </header>
@@ -18,38 +20,37 @@
     <main>
         <!-- Send Note Section -->
         <section class="section">
-            <h2>✨ Send a Secret Note</h2>
+            <h2>Send a Secret Note</h2>
+            <p>Send an encrypted message securely to any address.</p>
             <div class="form-group">
                 <input type="text" id="noteRecipient" placeholder="Recipient Address (0x...)">
                 <textarea id="noteContent" rows="4" placeholder="Write your secret message here..."></textarea>
-                <button id="sendNoteBtn" class="btn">Send Encrypted Note 🔒</button>
+                <button id="sendNoteBtn" class="btn">Send Encrypted Note</button>
             </div>
         </section>
 
         <!-- Icon Shop Section -->
         <section class="section">
-            <h2>🎁 Icon Shop</h2>
-            <p>Send a cute icon to a friend!</p>
+            <h2>Icon Shop</h2>
+            <p>Send an icon to make someone smile!</p>
             <div id="iconGrid" class="grid">
                 <!-- Icons will be loaded here -->
-                <div class="card">Getting icons...</div>
+                <div class="card">Connect your wallet to see the icons.</div>
             </div>
         </section>
 
         <!-- My Notes Section -->
         <section class="section">
-            <h2>💌 My Notes</h2>
+            <h2>My Notes</h2>
+            <p>View and decrypt your received messages.</p>
             <div id="notesList">
                 <p>Connect wallet to see your notes.</p>
             </div>
         </section>
     </main>
 
-    <footer class="footer">
-        Made with 💖 for Secure Data Project
-    </footer>
-
     <script src="abi.js"></script>
     <script src="app.js"></script>
 </body>
+
 </html>
