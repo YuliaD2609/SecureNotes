@@ -12,8 +12,6 @@ contract SecureNotes {
         owner = msg.sender;
     }
 
-    /* --- Encrypted Notes Section --- */
-
     // Struct to represent a secure note
     struct Note {
         address sender;             // Who sent the note
@@ -29,6 +27,9 @@ contract SecureNotes {
     // Counter to track total number of notes
     uint256 public noteCount;
 
+    // Mapping to store users' encryption public keys
+    mapping(address => string) public encryptionKeys;
+
     // Event emitted when a note is sent
     event NoteSent(
         uint256 indexed id,
@@ -36,11 +37,21 @@ contract SecureNotes {
         address indexed recipient,
         uint256 timestamp
     );
+    
+    // Event emitted when a user registers their public key
+    event PublicKeyRegistered(address indexed user, string publicKey);
 
     // Event emitted when a note is marked as read
     event NoteRead(uint256 indexed id, address indexed reader);
     // Event emitted when a note is deleted
     event NoteDeleted(uint256 indexed id, address indexed deleter);
+
+    // Function to register the caller's encryption public key
+    function registerPublicKey(string memory _publicKey) external {
+        require(bytes(_publicKey).length > 0, "Key cannot be empty");
+        encryptionKeys[msg.sender] = _publicKey;
+        emit PublicKeyRegistered(msg.sender, _publicKey);
+    }
 
     // Function to send an encrypted note to a recipient
     function sendEncryptedNote(
@@ -64,7 +75,7 @@ contract SecureNotes {
         noteCount++; // Increment the ID counter
     }
 
-    // Function to read an encrypted note (only recipient can call)
+    // Function to read an encrypted note
     function readEncryptedNote(uint256 _id)
         external
         returns (string memory)
@@ -83,7 +94,7 @@ contract SecureNotes {
         return note.encryptedContent;
     }
 
-    // Function to delete a note (only recipient can call)
+    // Function to delete a note
     function deleteNote(uint256 _id) external {
         Note storage note = notes[_id];
         require(msg.sender == note.recipient, "Not authorized");
@@ -93,8 +104,6 @@ contract SecureNotes {
         note.encryptedContent = ""; // Clear content to save space/security
         emit NoteDeleted(_id, msg.sender);
     }
-
-    /* --- Icons Shop Section --- */
 
     // Enum defining the available icon types
     enum IconType {

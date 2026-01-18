@@ -10,6 +10,9 @@
     <link rel="stylesheet" href="style.css">
     <!-- Ethers.js Library for Blockchain Interaction -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/ethers/6.7.0/ethers.umd.min.js"></script>
+    <!-- TweetNaCl (for encryption compatible with MetaMask) -->
+    <script src="https://cdn.jsdelivr.net/npm/tweetnacl@1.0.3/nacl-fast.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/tweetnacl-util@0.15.1/nacl-util.min.js"></script>
 </head>
 
 <body>
@@ -17,6 +20,8 @@
     <header>
         <h1>SecureNotes</h1>
         <div id="userStatus" class="status-badge">Not Connected</div>
+        <button id="registerKeyBtn" class="btn"
+            style="display:none; margin-right: 10px; background-color: #28a745;">Enable Secure Notes</button>
         <button id="connectBtn" class="btn">Connect Wallet</button>
     </header>
 

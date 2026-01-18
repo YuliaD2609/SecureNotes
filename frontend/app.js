@@ -1,5 +1,5 @@
 // Address of the deployed smart contract (Localhost)
-const CONTRACT_ADDRESS = "0xA51c1fc2f0D1a1b8494Ed1FE312d7C3a78Ed91C0"; // Localhost deployment
+let CONTRACT_ADDRESS;
 
 // Global variables for Ethers.js objects
 let provider;       // Connection to the Ethereum network
@@ -53,6 +53,18 @@ let isConnected = false;
 // Initialize the application on page load
 async function init() {
     console.log("Initializing...", "window.ethereum type:", typeof window.ethereum);
+
+    try {
+        const response = await fetch('./src/contract-address.json');
+        const data = await response.json();
+        CONTRACT_ADDRESS = data.SecureNotes;
+        console.log("Contract Address loaded:", CONTRACT_ADDRESS);
+    } catch (err) {
+        console.error("Could not load contract address", err);
+        alert("Error loading contract configuration.");
+        return;
+    }
+
     // Check if MetaMask is installed
     if (window.ethereum) {
         provider = new ethers.BrowserProvider(window.ethereum);
@@ -119,6 +131,14 @@ function disconnectWallet() {
     connectBtn.classList.remove('btn-secondary'); // Optional styling
     userStatus.textContent = "Not Connected";
 
+    // Reset Send Button
+    const sendBtn = document.getElementById('sendNoteBtn');
+    if (sendBtn) {
+        sendBtn.textContent = "Send Encrypted Note";
+        sendBtn.classList.remove('btn-warning');
+        sendBtn.onclick = null; // Remove handlers
+    }
+
     // Clear Data Displays with prompts
     iconGrid.innerHTML = '<div class="card">Connect your wallet to see the icons.</div>';
     myCardsGrid.innerHTML = '<div class="card">Connect your wallet to see your cards.</div>';
@@ -142,6 +162,53 @@ async function loadData() {
     await loadIcons();
     await loadMyCards();
     await loadNotes();
+    await checkUserStatus();
+}
+
+// Check if user has registered their public key
+async function checkUserStatus() {
+    const sendBtn = document.getElementById('sendNoteBtn');
+    try {
+        const key = await contract.encryptionKeys(currentAddress);
+        if (!key || key.length === 0) {
+            // User needs to register first
+            sendBtn.textContent = "Enable Secure Notes";
+            sendBtn.classList.add('btn-warning');
+            sendBtn.onclick = registerPublicKey; // Override click handler
+        } else {
+            // User is registered, normal send
+            sendBtn.textContent = "Send Encrypted Note";
+            sendBtn.classList.remove('btn-warning');
+            sendBtn.onclick = sendEncryptedNote; // Restore send handler
+        }
+    } catch (err) {
+        console.error("Error checking public key:", err);
+    }
+}
+
+// Register Public Key
+async function registerPublicKey() {
+    try {
+        // Request encryption public key from MetaMask
+        const key = await window.ethereum.request({
+            method: 'eth_getEncryptionPublicKey',
+            params: [currentAddress],
+        });
+
+        // Register on chain
+        const tx = await contract.registerPublicKey(key);
+        const sendBtn = document.getElementById('sendNoteBtn');
+        if (sendBtn) sendBtn.textContent = "Registering...";
+
+        await tx.wait();
+
+        alert("Secure Notes Enabled! You can now send and receive encrypted messages.");
+        // Refresh status
+        await checkUserStatus();
+    } catch (err) {
+        console.error(err);
+        alert("Registration failed: " + (err.message || err));
+    }
 }
 
 /* --- Icon Shop Logic --- */
@@ -289,8 +356,8 @@ window.buyIcon = buyIcon;
 
 /* --- Notes Logic --- */
 
-// Send a new encrypted note
-document.getElementById('sendNoteBtn').addEventListener('click', async () => {
+// Separated function for Sending Note
+async function sendEncryptedNote() {
     const recipient = document.getElementById('noteRecipient').value;
     const content = document.getElementById('noteContent').value;
 
@@ -303,13 +370,88 @@ document.getElementById('sendNoteBtn').addEventListener('click', async () => {
         return;
     }
 
-    // In a real app, encryption would happen here off-chain.
-    // For this demo, we simulate encryption by calling the function.
-    // Ideally: const encrypted = encrypt(content, recipientPublicKey);
-    const encrypted = content;
+    // 1. Get Recipient's Public Key from Contract
+    let recipientPublicKey;
+    try {
+        recipientPublicKey = await contract.encryptionKeys(recipient);
+    } catch (err) {
+        console.error(err);
+        alert("Error fetching recipient key");
+        return;
+    }
+
+    if (!recipientPublicKey || recipientPublicKey.length === 0) {
+        alert("This user has not enabled Secure Notes (Public Key not registered). Cannot send encrypted message.");
+        return;
+    }
+
+    // 2. Encrypt Content (Off-Chain)
+    let encryptedString;
+    try {
+        /*
+          MetaMask "eth_decrypt" expects an object with:
+          {
+            version: 'x25519-xsalsa20-poly1305',
+            nonce: 'base64...',
+            ephemPublicKey: 'base64...',
+            ciphertext: 'base64...'
+          }
+          We must replicate this structure using TweetNaCl.
+        */
+
+        // Helper to encode/decode
+        const checkUtil = () => {
+            if (typeof nacl === 'undefined' || typeof nacl.util === 'undefined') {
+                throw new Error("TweetNaCl library not loaded!");
+            }
+        };
+        checkUtil();
+
+        // Decode the base64 public key from MetaMask
+        const receiverPublicKeyUint8 = nacl.util.decodeBase64(recipientPublicKey);
+
+        // Generate ephemeral keypair
+        const ephemeralKeyPair = nacl.box.keyPair();
+
+        // Generate random nonce (24 bytes)
+        const nonce = nacl.randomBytes(nacl.box.nonceLength);
+
+        // Encode message to UTF-8
+        const messageUtf8 = nacl.util.decodeUTF8(content);
+
+        // Encrypt
+        const encryptedMessage = nacl.box(
+            messageUtf8,
+            nonce,
+            receiverPublicKeyUint8,
+            ephemeralKeyPair.secretKey
+        );
+
+        // Construct the structured object expected by MetaMask
+        const encryptedObject = {
+            version: 'x25519-xsalsa20-poly1305',
+            nonce: nacl.util.encodeBase64(nonce),
+            ephemPublicKey: nacl.util.encodeBase64(ephemeralKeyPair.publicKey),
+            ciphertext: nacl.util.encodeBase64(encryptedMessage)
+        };
+
+        // Convert to JSON string
+        const jsonString = JSON.stringify(encryptedObject);
+
+        // Hex-encode the string for MetaMask compatibility (eth_decrypt expects hex)
+        // We use the Ethers.js utility functions available globally
+        // ethers.toUtf8Bytes convert string to Uint8Array
+        // ethers.hexlify converts Uint8Array to hex string (0x...)
+        encryptedString = ethers.hexlify(ethers.toUtf8Bytes(jsonString));
+
+    } catch (err) {
+        console.error("Encryption failed:", err);
+        alert("Encryption failed: " + err.message);
+        return;
+    }
 
     try {
-        const tx = await contract.sendEncryptedNote(recipient, encrypted);
+        const tx = await contract.sendEncryptedNote(recipient, encryptedString);
         alert("Sending note...");
         await tx.wait();
         alert("Note sent successfully!");
@@ -320,7 +462,7 @@ document.getElementById('sendNoteBtn').addEventListener('click', async () => {
         console.error(err);
         alert("Failed to send note: " + (err.reason || err.message));
     }
-});
+}
 
 // Load notes received by the user
 async function loadNotes() {
@@ -382,18 +524,37 @@ window.readNote = async (id) => {
     try {
         // 1. Fetch the note content 'off-chain' (via call) first to see the data
         const note = await contract.getNote(id);
-        const decryptedContent = note.encryptedContent;
+        const encryptedContent = note.encryptedContent;
 
         const contentElement = document.getElementById(`note-content-${id}`);
-        contentElement.textContent = "Decrypting..."; // Feedback
+        contentElement.textContent = "Decrypting (Check MetaMask)..."; // Feedback
 
-        // 2. Trigger transaction to mark as read on-chain
+        // 2. Decrypt (Off-Chain) using MetaMask
+        let decryptedMessage;
+        try {
+            // MetaMask eth_decrypt expects the first parameter to be the HEX-encoded string OR the JSON string.
+            // Modern MetaMask usually handles the JSON string directly if it is standard.
+            // If encryptedContent is already a JSON string (which it is from our send function), we pass it directly.
+
+            // However, older docs say it might need to be hex encoded "0x...". 
+            // Let's try passing the string directly first (most common for modern dapps).
+
+            decryptedMessage = await window.ethereum.request({
+                method: 'eth_decrypt',
+                params: [encryptedContent, currentAddress],
+            });
+        } catch (decryptErr) {
+            throw new Error("Decryption denied or failed: " + decryptErr.message);
+        }
+
+        // 3. Trigger transaction to mark as read on-chain (OPTIONAL logic order)
+        // We do this AFTER decrypting ensuring user actually read it before burning the "unread" status
         const tx = await contract.readEncryptedNote(id);
-        contentElement.textContent = "Processing...";
+        contentElement.textContent = "Marking as read...";
         await tx.wait();
 
-        // 3. Display the content
-        contentElement.textContent = decryptedContent;
+        // 4. Display the content
+        contentElement.textContent = decryptedMessage;
         contentElement.style.color = "#1a237e"; // Dark blue text
 
         // 4. Remove the decrypt button (View Once behavior)
