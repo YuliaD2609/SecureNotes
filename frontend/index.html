@@ -16,7 +16,7 @@
 </head>
 
 <body>
-    <!-- HEADER: App Title and Wallet Connection -->
+    <!-- Header -->
     <header>
         <h1>SecureNotes</h1>
         <div id="userStatus" class="status-badge">Not Connected</div>
@@ -26,28 +26,26 @@
     </header>
 
     <main>
-        <!-- SEND NOTE: Form to create new encrypted messages -->
+        <!-- Form to create a new  message -->
         <section class="section">
             <h2>Send a Secret Note</h2>
             <p>Send an encrypted message securely to any address.</p>
             <div class="form-group">
                 <input type="text" id="noteRecipient" placeholder="Recipient Address (0x...)">
                 <textarea id="noteContent" rows="4" placeholder="Write your secret message here..."></textarea>
-                <button id="sendNoteBtn" class="btn">Send Encrypted Note</button>
+                <button id="sendNoteBtn" class="btn">Connect your wallet to send a note</button>
             </div>
         </section>
 
-        <!-- ICON SHOP: Buy and send icon gifts -->
+        <!-- Icon shop -->
         <section class="section">
             <h2>Icon Shop</h2>
             <p>Send an icon to make someone smile!</p>
 
-            <!-- Gallery View (Listing all icons) -->
             <div id="iconGrid" class="grid">
                 <div class="card">Connect your wallet to see the icons.</div>
             </div>
 
-            <!-- Detail View (Buying a specific icon) - Initially Hidden -->
             <div id="iconDetailView" class="detail-view hidden">
                 <div class="detail-image-container">
                     <img id="detailImage" src="" alt="Icon" class="detail-img">
@@ -69,7 +67,7 @@
             </div>
         </section>
 
-        <!-- MY CARDS: Display received icon gifts -->
+        <!-- Recieved icons -->
         <section class="section">
             <h2>My Cards</h2>
             <p>Cards you have received from friends!</p>
@@ -78,7 +76,7 @@
             </div>
         </section>
 
-        <!-- MY NOTES: Display received encrypted messages -->
+        <!-- Received messages -->
         <section class="section">
             <h2>My Notes</h2>
             <p>View and decrypt your received messages.</p>

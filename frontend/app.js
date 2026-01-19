@@ -34,8 +34,6 @@ const detailRecipient = document.getElementById('detailRecipient');
 const detailBuyBtn = document.getElementById('detailBuyBtn');
 const detailBackBtn = document.getElementById('detailBackBtn');
 
-/* --- Event Listeners --- */
-
 // Close Detail View Button
 detailBackBtn.addEventListener('click', closeDetailView);
 
@@ -48,13 +46,11 @@ detailBuyBtn.addEventListener('click', async () => {
 // Connection State Flag
 let isConnected = false;
 
-/* --- Initialization --- */
-
-// Initialize the application on page load
-async function init() {
+// Initialize the application
+async function init() { // check if the user has MetaMask installed
     console.log("Initializing...", "window.ethereum type:", typeof window.ethereum);
 
-    try {
+    try { // load the contract address from the JSON file to know where it is on the blockchain
         const response = await fetch('./src/contract-address.json');
         const data = await response.json();
         CONTRACT_ADDRESS = data.SecureNotes;
@@ -67,11 +63,11 @@ async function init() {
 
     // Check if MetaMask is installed
     if (window.ethereum) {
-        provider = new ethers.BrowserProvider(window.ethereum);
+        provider = new ethers.BrowserProvider(window.ethereum); // connect to the blockchain
 
         // Check if already authorized (auto-connect)
         try {
-            const accounts = await provider.send("eth_accounts", []);
+            const accounts = await provider.send("eth_accounts", []); // get the user's wallet address
             if (accounts.length > 0) {
                 await connectWallet();
             }
@@ -89,7 +85,7 @@ async function init() {
     }
 }
 
-// Handler for Connect/Disconnect button
+// Connect/Disconnect button
 connectBtn.addEventListener('click', async () => {
     if (isConnected) {
         disconnectWallet();
@@ -98,7 +94,6 @@ connectBtn.addEventListener('click', async () => {
     }
 });
 
-/* --- Wallet Management --- */
 
 // Connect to MetaMask wallet
 async function connectWallet() {
@@ -107,7 +102,7 @@ async function connectWallet() {
         // Request access to accounts
         const accounts = await provider.send("eth_requestAccounts", []);
         currentAddress = accounts[0];
-        signer = await provider.getSigner();
+        signer = await provider.getSigner(); // get the user's wallet address
         // Initialize contract instance
         contract = new ethers.Contract(CONTRACT_ADDRESS, CONTRACT_ABI, signer);
 
@@ -126,20 +121,17 @@ function disconnectWallet() {
     signer = null;
     contract = null;
 
-    // Reset UI text
     connectBtn.textContent = "Connect Wallet";
-    connectBtn.classList.remove('btn-secondary'); // Optional styling
+    connectBtn.classList.remove('btn-secondary');
     userStatus.textContent = "Not Connected";
 
-    // Reset Send Button
     const sendBtn = document.getElementById('sendNoteBtn');
     if (sendBtn) {
-        sendBtn.textContent = "Send Encrypted Note";
+        sendBtn.textContent = "Connect your wallet to send a note";
         sendBtn.classList.remove('btn-warning');
-        sendBtn.onclick = null; // Remove handlers
+        sendBtn.onclick = null;
     }
 
-    // Clear Data Displays with prompts
     iconGrid.innerHTML = '<div class="card">Connect your wallet to see the icons.</div>';
     myCardsGrid.innerHTML = '<div class="card">Connect your wallet to see your cards.</div>';
     notesList.innerHTML = '<p>Connect your wallet to see your recieved notes.</p>';
@@ -152,7 +144,7 @@ function disconnectWallet() {
 function updateUIConnected() {
     isConnected = true;
     connectBtn.textContent = "Disconnect";
-    connectBtn.disabled = false; // Enable to allow disconnect
+    connectBtn.disabled = false;
     // Display truncated address
     userStatus.textContent = `${currentAddress.substring(0, 6)}...${currentAddress.substring(38)}`;
 }
@@ -211,14 +203,12 @@ async function registerPublicKey() {
     }
 }
 
-/* --- Icon Shop Logic --- */
-
 // Fetch and display available icons from the shop
 async function loadIcons() {
     iconGrid.innerHTML = "Loading icons...";
     loadedIconsData = []; // Reset cache
     try {
-        const count = await contract.iconCount();
+        const count = await contract.iconCount(); // Icons on the contract
         iconGrid.innerHTML = "";
 
         if (count == 0n) {
@@ -240,7 +230,7 @@ async function loadIcons() {
             const card = document.createElement('div');
             card.className = 'card';
 
-            // Format display name (e.g., "HappyBirthday" -> "Happy Birthday")
+            // Format display name
             const iconTypeName = IconTypes[Number(icon.iconType)] || "Unknown";
             const displayName = iconTypeName.replace(/([A-Z])/g, ' $1').trim();
 
@@ -294,8 +284,6 @@ async function loadMyCards() {
         myCardsGrid.innerHTML = "<p>Error loading your cards.</p>";
     }
 }
-
-/* --- Detail View Logic --- */
 
 // Open the detail view for a specific icon
 window.openDetailIcon = (id) => {
@@ -354,9 +342,7 @@ async function buyIcon(id) {
 // Global for backward compatibility / console debugging
 window.buyIcon = buyIcon;
 
-/* --- Notes Logic --- */
-
-// Separated function for Sending Note
+// Function for Sending Note
 async function sendEncryptedNote() {
     const recipient = document.getElementById('noteRecipient').value;
     const content = document.getElementById('noteContent').value;
@@ -370,7 +356,7 @@ async function sendEncryptedNote() {
         return;
     }
 
-    // 1. Get Recipient's Public Key from Contract
+    // Get Recipient's Public Key from Contract
     let recipientPublicKey;
     try {
         recipientPublicKey = await contract.encryptionKeys(recipient);
@@ -385,7 +371,7 @@ async function sendEncryptedNote() {
         return;
     }
 
-    // 2. Encrypt Content (Off-Chain)
+    // Encrypt Content (Off-Chain)
     let encryptedString;
     try {
         /*
@@ -450,7 +436,7 @@ async function sendEncryptedNote() {
         return;
     }
 
-    try {
+    try { // Send encrypted note to contract
         const tx = await contract.sendEncryptedNote(recipient, encryptedString);
         alert("Sending note...");
         await tx.wait();
@@ -464,7 +450,7 @@ async function sendEncryptedNote() {
     }
 }
 
-// Load notes received by the user
+// Load notes received
 async function loadNotes() {
     notesList.innerHTML = "Loading notes...";
     try {
@@ -477,7 +463,7 @@ async function loadNotes() {
             const note = await contract.getNote(i);
             // note object contains: sender, recipient, encryptedContent, isRead, timestamp, isDeleted
 
-            // Filter: Only show notes sent to the current user
+            // Only show notes sent to the current user
             if (note.recipient.toLowerCase() === currentAddress.toLowerCase()) {
                 if (note.isDeleted) continue; // Skip deleted notes
 
@@ -522,22 +508,18 @@ async function loadNotes() {
 // Decrypt and Read a Note
 window.readNote = async (id) => {
     try {
-        // 1. Fetch the note content 'off-chain' (via call) first to see the data
+        // Fetch the note content off-chain to see the data
         const note = await contract.getNote(id);
         const encryptedContent = note.encryptedContent;
 
         const contentElement = document.getElementById(`note-content-${id}`);
         contentElement.textContent = "Decrypting (Check MetaMask)..."; // Feedback
 
-        // 2. Decrypt (Off-Chain) using MetaMask
+        // Decrypt (Off-Chain) using MetaMask
         let decryptedMessage;
         try {
             // MetaMask eth_decrypt expects the first parameter to be the HEX-encoded string OR the JSON string.
-            // Modern MetaMask usually handles the JSON string directly if it is standard.
             // If encryptedContent is already a JSON string (which it is from our send function), we pass it directly.
-
-            // However, older docs say it might need to be hex encoded "0x...". 
-            // Let's try passing the string directly first (most common for modern dapps).
 
             decryptedMessage = await window.ethereum.request({
                 method: 'eth_decrypt',
@@ -547,17 +529,17 @@ window.readNote = async (id) => {
             throw new Error("Decryption denied or failed: " + decryptErr.message);
         }
 
-        // 3. Trigger transaction to mark as read on-chain (OPTIONAL logic order)
-        // We do this AFTER decrypting ensuring user actually read it before burning the "unread" status
+        // Trigger transaction to mark as read on-chain
+        // After decrypting ensuring user actually read it before burning the "unread" status
         const tx = await contract.readEncryptedNote(id);
         contentElement.textContent = "Marking as read...";
         await tx.wait();
 
-        // 4. Display the content
+        // Display the content
         contentElement.textContent = decryptedMessage;
         contentElement.style.color = "#1a237e"; // Dark blue text
 
-        // 4. Remove the decrypt button (View Once behavior)
+        // Remove the decrypt button
         const btn = document.getElementById(`decrypt-btn-${id}`);
         if (btn) btn.remove();
     } catch (err) {

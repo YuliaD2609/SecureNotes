@@ -1,4 +1,8 @@
-const CONTRACT_ABI = [
+// Application Binary Interface
+/* translator for the smart contract from bytecode (stored from the Ethereum Virtual Machine)
+to a JSON array for JavaScript
+*/
+const CONTRACT_ABI = [ // define the callable functions
   {
     "inputs": [],
     "stateMutability": "nonpayable",

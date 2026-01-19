@@ -228,8 +228,6 @@ contract SecureNotes {
         );
     }
 
-    /* --- View Functions (Getters) --- */
-
     // Get details of a specific note
     function getNote(uint256 _id)
         external
