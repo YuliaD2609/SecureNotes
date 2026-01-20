@@ -1,2 +1,2 @@
 # SecureNotes
-WebApp per condividere note testuali cifrate, che possono essere lette una sola volta entro una scadenza, e messaggi di auguri acquistabili.
+WebApp per condividere note testuali cifrate tramite blockchain Ethereum, che possono essere lette una sola volta, e messaggi di auguri acquistabili con Ethers.
