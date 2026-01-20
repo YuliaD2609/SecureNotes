@@ -2,8 +2,8 @@
   "_format": "hh-sol-cache-2",
   "files": {
     "C:\\Users\\yulia\\OneDrive\\Desktop\\Progetto sicurezza dei dati\\SecureNotes\\contracts\\SecureNotes.sol": {
-      "lastModificationDate": 1768749123410,
-      "contentHash": "774fd8de87e2b618e4df48331017d089",
+      "lastModificationDate": 1768830478939,
+      "contentHash": "128ba5a032aad6524bd7ce00aa00c0a6",
       "sourceName": "contracts/SecureNotes.sol",
       "solcConfig": {
         "version": "0.8.19",

@@ -65,6 +65,14 @@ async function init() { // check if the user has MetaMask installed
     if (window.ethereum) {
         provider = new ethers.BrowserProvider(window.ethereum); // connect to the blockchain
 
+        // Handle account changes
+        window.ethereum.on('accountsChanged', (accounts) => {
+            console.log("Account changed:", accounts);
+            disconnectWallet();
+            // User must manually reconnect
+        });
+
+        /* Auto-connect disabled
         // Check if already authorized (auto-connect)
         try {
             const accounts = await provider.send("eth_accounts", []); // get the user's wallet address
@@ -74,6 +82,7 @@ async function init() { // check if the user has MetaMask installed
         } catch (err) {
             console.error("Auto-connect failed", err);
         }
+        */
     } else {
         console.error("MetaMask not found!");
         // Specific error for file:// protocol
@@ -138,6 +147,12 @@ function disconnectWallet() {
 
     // Close detail view if open
     closeDetailView();
+
+    // Clear Form Inputs
+    const recipientInput = document.getElementById('noteRecipient');
+    const contentInput = document.getElementById('noteContent');
+    if (recipientInput) recipientInput.value = "";
+    if (contentInput) contentInput.value = "";
 }
 
 // Update UI elements when connected

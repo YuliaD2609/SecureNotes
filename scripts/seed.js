@@ -19,6 +19,13 @@ async function main() {
         { type: 3, price: hre.ethers.parseEther("1") }, // Graduation
     ];
 
+    // Check if icons are already seeded
+    const count = await secureNotes.iconCount();
+    if (count > 0n) {
+        console.log("Icons already seeded. Skipping.");
+        return;
+    }
+
     // 4. Add each icon to the contract
     for (const icon of icons) {
         console.log(`Adding icon type ${icon.type} with price ${hre.ethers.formatEther(icon.price)} ETH`);
