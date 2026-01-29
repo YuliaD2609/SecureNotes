@@ -73,7 +73,6 @@ async function init() { // check if the user has MetaMask installed
 
     } else {
         console.error("MetaMask not found!");
-        // Specific error for file:// protocol
         if (window.location.protocol === 'file:') {
             alert("MetaMask does not work when opening files directly (file://). Please use a local server (http://localhost).");
         } else {
@@ -334,7 +333,6 @@ async function buyIcon(id) {
         await tx.wait(); // Wait for block confirmation
         alert("Gift sent successfully!");
         closeDetailView();
-        // Reload data to reflect changes (though shop doesn't change, balances do)
         loadData();
     } catch (err) {
         console.error(err);
@@ -385,7 +383,7 @@ async function sendEncryptedNote() {
             ephemPublicKey: 'base64...',
             ciphertext: 'base64...'
           }
-          We must replicate this structure using TweetNaCl.
+          Using TweetNaCl.
         */
 
         // Helper to encode/decode
@@ -428,7 +426,7 @@ async function sendEncryptedNote() {
         const jsonString = JSON.stringify(encryptedObject);
 
         // Hex-encode the string for MetaMask compatibility (eth_decrypt expects hex)
-        // We use the Ethers.js utility functions available globally
+        // Using Ethers.js utility functions available globally
         // ethers.toUtf8Bytes convert string to Uint8Array
         // ethers.hexlify converts Uint8Array to hex string (0x...)
         encryptedString = ethers.hexlify(ethers.toUtf8Bytes(jsonString));
@@ -446,7 +444,6 @@ async function sendEncryptedNote() {
         alert("Note sent successfully!");
         // Clear inputs
         document.getElementById('noteContent').value = "";
-        // Refresh list to show sent notes if we were tracking them (function only loads received)
     } catch (err) {
         console.error(err);
         alert("Failed to send note: " + (err.reason || err.message));
@@ -466,7 +463,7 @@ async function loadNotes() {
             const note = await contract.getNote(i);
             // note object contains: sender, recipient, encryptedContent, isRead, timestamp, isDeleted
 
-            // Only show notes sent to the current user
+            // Notes sent to the current user
             if (note.recipient.toLowerCase() === currentAddress.toLowerCase()) {
                 if (note.isDeleted) continue; // Skip deleted notes
 
@@ -521,8 +518,7 @@ window.readNote = async (id) => {
         // Decrypt (Off-Chain) using MetaMask
         let decryptedMessage;
         try {
-            // MetaMask eth_decrypt expects the first parameter to be the HEX-encoded string OR the JSON string.
-            // If encryptedContent is already a JSON string (which it is from our send function), we pass it directly.
+            // MetaMask eth_decrypt: first parameter the HEX-encoded string OR the JSON string.
 
             decryptedMessage = await window.ethereum.request({
                 method: 'eth_decrypt',

@@ -152,7 +152,7 @@ contract SecureNotes {
         _;
     }
 
-    // Function for owner to add a new icon to the shop
+    // Function to add a new icon to the shop
     function addIcon(IconType _type, uint256 _price)
         external
         onlyOwner
@@ -179,7 +179,7 @@ contract SecureNotes {
         icons[_id].price = _newPrice;
     }
 
-    // Function to set whether an icon is available for purchase
+    // Function to set if an icon is available for purchase
     function setIconAvailability(uint256 _id, bool _available)
         external
         onlyOwner
