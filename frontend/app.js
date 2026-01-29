@@ -69,20 +69,8 @@ async function init() { // check if the user has MetaMask installed
         window.ethereum.on('accountsChanged', (accounts) => {
             console.log("Account changed:", accounts);
             disconnectWallet();
-            // User must manually reconnect
         });
 
-        /* Auto-connect disabled
-        // Check if already authorized (auto-connect)
-        try {
-            const accounts = await provider.send("eth_accounts", []); // get the user's wallet address
-            if (accounts.length > 0) {
-                await connectWallet();
-            }
-        } catch (err) {
-            console.error("Auto-connect failed", err);
-        }
-        */
     } else {
         console.error("MetaMask not found!");
         // Specific error for file:// protocol
